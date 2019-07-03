@@ -30,7 +30,15 @@ class Student
   def self.find_by_name(name)
     # find the student in the database given a name
     # return a new instance of the Student class
-    binding.pry
+    # Does this really need to create a new instance in a real world situation? 
+    sql = <<-SQL
+      SELECT * FROM students
+      WHERE name = ?
+      LIMIT 1
+    SQL
+    row = DB[:conn].execute(sql, name)
+    #feels like there is a better way to get this single item out of the array, or maybe not return an array at all from previous method
+    self.new_from_db(row[0])
   end
   
   def save
@@ -58,4 +66,44 @@ class Student
     sql = "DROP TABLE IF EXISTS students"
     DB[:conn].execute(sql)
   end
+
+  def self.all_students_in_grade_9
+    # This feels like too specific a method to really be useful. Should take 'grade' as an argument and be more flexi.
+    sql = <<-SQL
+      SELECT * FROM students
+      WHERE grade = ?
+    SQL
+    DB[:conn].execute(sql, 9).map {|row| self.new_from_db(row) }
+  end
+
+  def self.students_below_12th_grade
+    sql = <<-SQL
+      SELECT * FROM students
+      WHERE grade < ?
+    SQL
+    DB[:conn].execute(sql, 12).map {|row| self.new_from_db(row)}
+  end
+
+  def self.first_X_students_in_grade_10(x)
+    sql = <<-SQL
+      SELECT * FROM students
+      WHERE grade = ?
+      LIMIT ?
+    SQL
+    DB[:conn].execute(sql, 10, x).map {|row| self.new_from_db(row)}
+  end 
+
+  def self.first_student_in_grade_10
+    self.first_X_students_in_grade_10(1)[0]
+  end
+
+  def self.all_students_in_grade_X(x)
+    sql = <<-SQL
+      SELECT * FROM students
+      WHERE grade = ?
+    SQL
+    DB[:conn].execute(sql, x).map {|row| self.new_from_db(row)}  
+  end
+
+
 end
