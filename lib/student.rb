@@ -2,6 +2,7 @@ require 'pry'
 
 class Student
   attr_accessor :id, :name, :grade
+  attr_reader :make_many_rows_instances
 
   def self.new_from_db(row)
     # create a new Student object given a row from the database
@@ -14,6 +15,11 @@ class Student
   end
 
   @@all = []
+
+  def self.make_many_rows_instances(rows_plural)
+    # binding.pry
+    rows_plural.map {|row| self.new_from_db(row)}
+  end
 
   def self.all
     # retrieve all the rows from the "Students" database
@@ -73,7 +79,9 @@ class Student
       SELECT * FROM students
       WHERE grade = ?
     SQL
-    DB[:conn].execute(sql, 9).map {|row| self.new_from_db(row) }
+    # DB[:conn].execute(sql, 9).map {|row| self.new_from_db(row) } #using helper method 
+    # rows_plural = DB[:conn].execute(sql, 9)
+    self.make_many_rows_instances(DB[:conn].execute(sql, 9))
   end
 
   def self.students_below_12th_grade
@@ -81,7 +89,8 @@ class Student
       SELECT * FROM students
       WHERE grade < ?
     SQL
-    DB[:conn].execute(sql, 12).map {|row| self.new_from_db(row)}
+    # DB[:conn].execute(sql, 12).map {|row| self.new_from_db(row)} #replacing with helper method
+    self.make_many_rows_instances(DB[:conn].execute(sql,12))
   end
 
   def self.first_X_students_in_grade_10(x)
@@ -90,7 +99,9 @@ class Student
       WHERE grade = ?
       LIMIT ?
     SQL
-    DB[:conn].execute(sql, 10, x).map {|row| self.new_from_db(row)}
+    # DB[:conn].execute(sql, 10, x).map {|row| self.new_from_db(row)} 
+    #replacing with helper method #aka a method that is not much shorter than the code replaced
+    self.make_many_rows_instances(DB[:conn].execute(sql, 10, x))
   end 
 
   def self.first_student_in_grade_10
@@ -102,8 +113,7 @@ class Student
       SELECT * FROM students
       WHERE grade = ?
     SQL
-    DB[:conn].execute(sql, x).map {|row| self.new_from_db(row)}  
+    # DB[:conn].execute(sql, x).map {|row| self.new_from_db(row)}  
+    self.make_many_rows_instances(DB[:conn].execute(sql, x))
   end
-
-
 end
