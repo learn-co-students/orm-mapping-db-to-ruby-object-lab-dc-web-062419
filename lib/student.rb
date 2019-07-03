@@ -6,7 +6,7 @@ class Student
 
   def self.new_from_db(row)
     # create a new Student object given a row from the database
-    # There has to be a more flexible way to match variable names to columns. Did we do that last time with a k,v pair?
+    # There has to be a more flexible way to match variable names to columns. Did we do that last time with a symbol, value pair name: ?
     noob= self.new
     noob.id = row[0]
     noob.name = row[1]
